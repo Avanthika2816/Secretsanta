@@ -9,15 +9,22 @@ import traceback
 import re
 
 app = Flask(__name__)
-
 # Enable CORS for frontend communication
 CORS(app, resources={
     r"/*": {
-        "origins": ["http://localhost:*", "http://127.0.0.1:*", "file://*"],
+        "origins": "*",
         "methods": ["GET", "POST", "OPTIONS"],
         "allow_headers": ["Content-Type"]
     }
 })
+
+@app.route("/health", methods=["GET"])
+def health():
+    return jsonify({
+        "status": "running",
+        "service": "Secret Santa Backend"
+    })
+
 
 # 🔑 EMAIL CONFIGURATION
 # IMPORTANT: Change these values to your own!

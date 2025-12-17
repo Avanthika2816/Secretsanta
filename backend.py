@@ -10,6 +10,13 @@ import re
 
 app = Flask(__name__)
 # Enable CORS for frontend communication
+@app.route("/health", methods=["GET"])
+def health():
+    return jsonify({
+        "status": "running",
+        "service": "Secret Santa Backend"
+    })
+
 CORS(app, resources={
     r"/*": {
         "origins": "*",
@@ -18,18 +25,13 @@ CORS(app, resources={
     }
 })
 
-@app.route("/health", methods=["GET"])
-def health():
-    return jsonify({
-        "status": "running",
-        "service": "Secret Santa Backend"
-    })
-
 
 # 🔑 EMAIL CONFIGURATION
 # IMPORTANT: Change these values to your own!
-OFFICIAL_EMAIL = "secretsanta1.noreply@gmail.com"  # ⚠️ CHANGE THIS
-GMAIL_APP_PASSWORD = "xkkajzxtyyueztxz"      # ⚠️ CHANGE THIS
+import os
+
+OFFICIAL_EMAIL = os.getenv("OFFICIAL_EMAIL")
+GMAIL_APP_PASSWORD = os.getenv("GMAIL_APP_PASSWORD")
 
 # Email validation regex
 EMAIL_REGEX = re.compile(r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$')

@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Secret Santa - Anonymous Message Sender</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-20px); }
+        }
+        .float { animation: float 3s ease-in-out infinite; }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-red-50 via-green-50 to-red-50 min-h-screen">
+    <div id="root"></div>
+    
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    
+    <script type="text/babel">
+        const { useState } = React;
+        
+        function SecretSantaApp() {
+            const [step, setStep] = useState(1);
+            const [formData, setFormData] = useState({
+                senderName: '',
+                senderEmail: '',
+                recipientEmail: '',
+                message: ''
+            });
+            const [sending, setSending] = useState(false);
+            const [sent, setSent] = useState(false);
+            const [error, setError] = useState('');
+
+            const validateEmail = (email) => {
+                return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+            };
+
+            const handleSubmit = async () => {
+                setError('');
+                setSending(true);
+
+                try {
+                    const response = await fetch('http://localhost:5000/send-anonymous-email', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(formData)
+                    });
+
+                    const result = await response.json();
+                    
+                    if (result.success) {
+                        setSent(true);
+                    } else {
+                        setError(result.error || 'Failed to send email');
+                    }
+                } catch (err) {
+                    setError('Could not connect to server. Make sure backend is running!');
+                } finally {
+                    setSending(false);
+                }
+            };
+
+            const resetForm = () => {
+                setStep(1);
+                setFormData({ senderName: '', senderEmail: '', recipientEmail: '', message: '' });
+                setSent(false);
+                setError('');
+            };
+
+            return (
+                <div className="max-w-4xl mx-auto p-6 min-h-screen">
+                    <div className="text-center mb-8 mt-8">
+                        <h1 className="text-6xl font-bold bg-gradient-to-r from-red-600 via-green-600 to-red-600 bg-clip-text text-transparent mb-4">
+                            🎅 Secret Santa 🎁
+                        </h1>
+                        <p className="text-gray-600 text-xl">100% Anonymous Message Delivery</p>
+                        <p className="text-green-600 font-semibold mt-2">🔒 Your Identity Protected</p>
+                    </div>
+
+                    <div className="bg-white rounded-3xl shadow-2xl p-8 border-4 border-red-200">
+                        {!sent ? (
+                            <>
+                                {step === 1 && (
+                                    <div className="space-y-6">
+                                        <h2 className="text-3xl font-bold text-center mb-6">Anonymous Setup 🕵️</h2>
+                                        
+                                        <div>
+                                            <label className="block text-sm font-semibold mb-2">Your Name (Optional)</label>
+                                            <input
+                                                type="text"
+                                                value={formData.senderName}
+                                                onChange={(e) => setFormData({ ...formData, senderName: e.target.value })}
+                                                className="w-full px-4 py-3 border-2 rounded-xl focus:border-red-500 focus:outline-none"
+                                                placeholder="John (optional)"
+                                            />
+                                        </div>
+
+                                        <div>
+                                            <label className="block text-sm font-semibold mb-2">Your Email (Private)</label>
+                                            <input
+                                                type="email"
+                                                value={formData.senderEmail}
+                                                onChange={(e) => setFormData({ ...formData, senderEmail: e.target.value })}
+                                                className="w-full px-4 py-3 border-2 rounded-xl focus:border-red-500 focus:outline-none"
+                                                placeholder="your-email@example.com"
+                                            />
+                                        </div>
+
+                                        <div>
+                                            <label className="block text-sm font-semibold mb-2">Recipient's Email</label>
+                                            <input
+                                                type="email"
+                                                value={formData.recipientEmail}
+                                                onChange={(e) => setFormData({ ...formData, recipientEmail: e.target.value })}
+                                                className="w-full px-4 py-3 border-2 rounded-xl focus:border-green-500 focus:outline-none"
+                                                placeholder="recipient@example.com"
+                                            />
+                                        </div>
+
+                                        <button
+                                            onClick={() => {
+                                                if (!validateEmail(formData.senderEmail) || !validateEmail(formData.recipientEmail)) {
+                                                    setError('Please enter valid email addresses');
+                                                    return;
+                                                }
+                                                setError('');
+                                                setStep(2);
+                                            }}
+                                            disabled={!formData.senderEmail || !formData.recipientEmail}
+                                            className="w-full bg-gradient-to-r from-red-600 to-red-700 text-white py-4 rounded-xl font-bold text-lg hover:from-red-700 hover:to-red-800 disabled:opacity-50"
+                                        >
+                                            Next: Create Message →
+                                        </button>
+                                    </div>
+                                )}
+
+                                {step === 2 && (
+                                    <div className="space-y-6">
+                                        <h2 className="text-3xl font-bold text-center mb-6">Craft Your Message ✨</h2>
+                                        
+                                        <textarea
+                                            value={formData.message}
+                                            onChange={(e) => setFormData({ ...formData, message: e.target.value })}
+                                            className="w-full px-4 py-3 border-2 rounded-xl focus:border-green-500 focus:outline-none resize-none"
+                                            rows="8"
+                                            placeholder="Write your magical Secret Santa message..."
+                                        />
+
+                                        <div className="flex gap-3">
+                                            <button
+                                                onClick={() => setStep(1)}
+                                                className="flex-1 bg-gray-200 py-4 rounded-xl font-bold hover:bg-gray-300"
+                                            >
+                                                ← Back
+                                            </button>
+                                            <button
+                                                onClick={() => setStep(3)}
+                                                disabled={!formData.message}
+                                                className="flex-1 bg-gradient-to-r from-green-600 to-green-700 text-white py-4 rounded-xl font-bold hover:from-green-700 hover:to-green-800 disabled:opacity-50"
+                                            >
+                                                Review & Send →
+                                            </button>
+                                        </div>
+                                    </div>
+                                )}
+
+                                {step === 3 && (
+                                    <div className="space-y-6">
+                                        <h2 className="text-3xl font-bold text-center mb-6">Final Review 📋</h2>
+                                        
+                                        <div className="bg-gradient-to-br from-red-50 to-green-50 p-6 rounded-xl space-y-4">
+                                            <div>
+                                                <p className="text-sm font-semibold text-gray-600">From:</p>
+                                                <p className="text-2xl font-bold text-red-600">Secret Santa 🎅</p>
+                                            </div>
+                                            <div>
+                                                <p className="text-sm font-semibold text-gray-600">To:</p>
+                                                <p className="text-lg font-bold">{formData.recipientEmail}</p>
+                                            </div>
+                                            <div>
+                                                <p className="text-sm font-semibold text-gray-600">Message:</p>
+                                                <div className="bg-white p-4 rounded-lg mt-2">
+                                                    <p className="whitespace-pre-wrap">{formData.message}</p>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        {error && (
+                                            <div className="bg-red-50 border-2 border-red-200 rounded-xl p-4">
+                                                <p className="text-red-800">{error}</p>
+                                            </div>
+                                        )}
+
+                                        <div className="flex gap-3">
+                                            <button
+                                                onClick={() => setStep(2)}
+                                                className="flex-1 bg-gray-200 py-4 rounded-xl font-bold hover:bg-gray-300"
+                                            >
+                                                ← Back
+                                            </button>
+                                            <button
+                                                onClick={handleSubmit}
+                                                disabled={sending}
+                                                className="flex-1 bg-gradient-to-r from-red-600 to-green-600 text-white py-4 rounded-xl font-bold text-lg hover:from-red-700 hover:to-green-700 disabled:opacity-50"
+                                            >
+                                                {sending ? 'Sending...' : '📧 Send Anonymous Message'}
+                                            </button>
+                                        </div>
+                                    </div>
+                                )}
+                            </>
+                        ) : (
+                            <div className="text-center py-12 space-y-6">
+                                <div className="text-6xl mb-4">✅</div>
+                                <h2 className="text-4xl font-bold">Message Sent! 🎉</h2>
+                                <p className="text-xl text-gray-600">
+                                    Anonymous message delivered to<br />
+                                    <strong className="text-green-600">{formData.recipientEmail}</strong>
+                                </p>
+                                <div className="bg-green-50 border-2 border-green-200 rounded-xl p-6 max-w-md mx-auto">
+                                    <p className="text-green-800 text-sm">
+                                        ✅ Delivered as: Secret Santa 🎅<br />
+                                        ✅ Your identity: Protected & Hidden<br />
+                                        ✅ Sender email: Not disclosed
+                                    </p>
+                                </div>
+                                <button
+                                    onClick={resetForm}
+                                    className="mt-6 bg-gradient-to-r from-red-600 to-red-700 text-white px-8 py-4 rounded-xl font-bold hover:from-red-700 hover:to-red-800"
+                                >
+                                    Send Another Message
+                                </button>
+                            </div>
+                        )}
+                    </div>
+                </div>
+            );
+        }
+
+        ReactDOM.render(<SecretSantaApp />, document.getElementById('root'));
+    </script>
+</body>
+</html>

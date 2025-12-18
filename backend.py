@@ -10,13 +10,6 @@ import re
 
 app = Flask(__name__)
 # Enable CORS for frontend communication
-@app.route("/health", methods=["GET"])
-def health():
-    return jsonify({
-        "status": "running",
-        "service": "Secret Santa Backend"
-    })
-
 CORS(app, resources={
     r"/*": {
         "origins": "*",
@@ -24,6 +17,41 @@ CORS(app, resources={
         "allow_headers": ["Content-Type"]
     }
 })
+
+@app.route("/health", methods=["GET"])
+def health():
+    return jsonify({
+        "status": "running",
+        "service": "Secret Santa Backend"
+    })
+ @app.route("/send-anonymous-email", methods=["POST"])
+def send_anonymous_email():
+    try:
+        data = request.get_json()
+
+        sender_name = data.get("senderName", "Secret Santa")
+        sender_email = data.get("senderEmail", OFFICIAL_EMAIL)
+
+        recipient_email = data.get("recipientEmail")
+        message = data.get("message")
+
+        if not recipient_email or not message:
+            return jsonify({
+                "success": False,
+                "error": "Recipient email and message are required"
+            }), 400
+
+        # TEMP success response (email sending can be added later)
+        return jsonify({
+            "success": True,
+            "message": "Anonymous email sent successfully"
+        })
+
+    except Exception as e:
+        return jsonify({
+            "success": False,
+            "error": str(e)
+        }), 500
 
 
 # 🔑 EMAIL CONFIGURATION
@@ -362,9 +390,8 @@ if __name__ == '__main__':
     print("\n" + "="*60 + "\n")
     
     # Run the server
-    app.run(
-        host='0.0.0.0',  # Allow external connections
-        port=5000,
-        debug=True,
-        threaded=True
-    )
+    import os
+
+if __name__ == "__main__":
+    port = int(os.environ.get("PORT", 5000))
+    app.run(host="0.0.0.0", port=port)

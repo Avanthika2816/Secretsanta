@@ -13,8 +13,6 @@ GMAIL_APP_PASSWORD = os.environ.get("GMAIL_APP_PASSWORD")
 RESEND_API_KEY= os.environ.get("RESEND_API_KEY")
 print("RESEND KEY PRESENT:",bool(RESEND_API_KEY))
 
-EMAIL_REGEX = re.compile(r"^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$")
-
 @app.route("/health", methods=["GET"])
 def health():
     configured = bool(OFFICIAL_EMAIL and GMAIL_APP_PASSWORD)
@@ -45,12 +43,14 @@ def send_email():
     if request.method == "OPTIONS":
         return "", 200
 
-    data = request.get_json()
-    recipient = data.get("recipientEmail")
-    message = data.get("message")
+    data = request.get_json(force=True)
+    print("RAW DATA:", data)
+    recipient = data.get("recipientEmail").strip()
+    message = data.get("message").strip()
+    print("RECIPIENT:", recipient)
 
-    if not recipient or not EMAIL_REGEX.match(recipient):
-        return jsonify({"error": "Invalid recipient email"}), 400
+    if not recipient or "@" not in recipient:
+        return jsonify({"error":"Invalid recipient email"}), 400
 
     if not message or len(message.strip()) == 0:
         return jsonify({"error": "Message cannot be empty"}), 400
@@ -58,7 +58,6 @@ def send_email():
     try:
         send_email_resend(recipient, message)
         return jsonify({"success": True}), 200
-
     except Exception as e:
         print("EMAIL ERROR:", e)
         return jsonify({"success": False, "error": str(e)}), 500

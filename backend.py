@@ -5,7 +5,7 @@ from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 
 app = Flask(__name__)
-CORS(app)
+CORS(app, resources={r"/*": {"origins": "*"}}, supports_credentials=True)
 
 OFFICIAL_EMAIL = os.environ.get("OFFICIAL_EMAIL")
 GMAIL_APP_PASSWORD = os.environ.get("GMAIL_APP_PASSWORD")
@@ -19,9 +19,11 @@ def health():
         "status": "healthy" if configured else "needs_configuration",
         "configured": configured
     })
-
-@app.route("/send-anonymous-email", methods=["POST"])
+@app.route("/send-anonymous-email", methods=["POST", "OPTIONS"])
 def send_email():
+    if request.method == "OPTIONS":
+        return "", 200
+
     data = request.get_json()
 
     recipient = data.get("recipientEmail")

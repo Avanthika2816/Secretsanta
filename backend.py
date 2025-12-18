@@ -11,6 +11,7 @@ CORS(app, resources={r"/*": {"origins": "*"}}, supports_credentials=True)
 OFFICIAL_EMAIL = os.environ.get("OFFICIAL_EMAIL")
 GMAIL_APP_PASSWORD = os.environ.get("GMAIL_APP_PASSWORD")
 RESEND_API_KEY= os.environ.get("RESEND_API_KEY")
+print("RESEND KEY PRESENT:",bool(RESEND_API_KEY))
 
 EMAIL_REGEX = re.compile(r"^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$")
 

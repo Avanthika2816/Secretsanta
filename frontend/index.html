@@ -134,10 +134,6 @@
 
                                         <button
                                             onClick={() => {
-                                                if (!validateEmail(formData.senderEmail) || !validateEmail(formData.recipientEmail)) {
-                                                    setError('Please enter valid email addresses');
-                                                    return;
-                                                }
                                                 setError('');
                                                 setStep(2);
                                             }}

@@ -36,7 +36,7 @@
             const [error, setError] = useState('');
 
             const validateEmail = (email) => {
-                return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+                    return email.includes("@") && email.includes(".");
             };
 
             const handleSubmit = async () => {
@@ -257,3 +257,21 @@
     </script>
 </body>
 </html>
+
+@app.route("/send-anonymous-email", methods=["POST"])
+def send_anonymous_email():
+    data = request.get_json()
+    to_email = data.get("email")
+    message = data.get("message")
+
+    if not to_email or not message:
+        return jsonify({"error": "Missing email or message"}), 400
+
+    if not EMAIL_REGEX.match(to_email):
+        return jsonify({"error": "Invalid email format"}), 400
+
+    try:
+        send_email(to_email, message)
+        return jsonify({"success": True})
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500

@@ -55,13 +55,11 @@
     "Content-Type": "application/json",
     },
     body: JSON.stringify({
-        senderEmail:formData.senderEmail ||
-        "anonymous@secretsanta.com",
-    recipientEmail: formData.recipientEmail,
-    message: formData.message,
+        email: formData.recipientEmail,
+        message: formData.message
     }),
 }
-)
+                    );
 
                     const result = await response.json();
                     

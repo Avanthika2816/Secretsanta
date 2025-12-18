@@ -29,7 +29,7 @@ def send_email_resend(to_email, message):
             "Content-Type": "application/json"
         },
         json={
-            "from": "Secret Santa <onboarding@resend.dev>",
+            "from": "Secret Santa <no-reply@resend.dev>",
             "to": [to_email],
             "subject": "🎁 You got a Secret Santa message!",
             "text": message

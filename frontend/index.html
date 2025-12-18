@@ -40,7 +40,10 @@
             };
 
             const handleSubmit = async () => {
-                setError('');
+                console.log("HANDLE SUBMIT CLICKED");
+                console.log(formData);
+
+                setError("");
                 setSending(true);
 
                 try {
@@ -52,8 +55,8 @@
     "Content-Type": "application/json",
     },
     body: JSON.stringify({
-    senderName: formData.senderName,
-    senderEmail: formData.senderEmail,
+        senderEmail:formData.senderEmail ||
+        "anonymous@secretsanta.com",
     recipientEmail: formData.recipientEmail,
     message: formData.message,
     }),
@@ -213,6 +216,7 @@
                                                 ← Back
                                             </button>
                                             <button
+                                            type="button"
                                                 onClick={handleSubmit}
                                                 disabled={sending}
                                                 className="flex-1 bg-gradient-to-r from-red-600 to-green-600 text-white py-4 rounded-xl font-bold text-lg hover:from-red-700 hover:to-green-700 disabled:opacity-50"
